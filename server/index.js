@@ -2,11 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const { Server } = require("socket.io");
 const http = require('http');
+
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 app.use(cors());
 
 const server = http.createServer(app);
+
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:3000",
@@ -26,6 +28,7 @@ io.on("connection", (socket) => {
 
     // SEND-MSG
     socket.on("send_message", (data) => {
+        // RECEIVE-MSG
         socket.to(data.room).emit("receive_message", data);
     });
 
@@ -34,7 +37,6 @@ io.on("connection", (socket) => {
         console.log("User Disconnected", socket.id);
     });
 });
-
 
 server.listen(PORT, () => {
     console.log(`Server is Running on Port=${PORT}`);

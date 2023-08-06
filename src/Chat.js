@@ -1,3 +1,4 @@
+// MY-CODE
 import React, { useEffect, useState } from 'react'
 import ScrollToBottom from 'react-scroll-to-bottom';
 
@@ -41,7 +42,10 @@ const Chat = ({ socket, userName, room }) => {
                 <ScrollToBottom className='h-60'>
                     {messageList.map((msg, index) => {
                         return (
-                            <div key={index} className={`${userName !== msg.author ? "text-right" : "text-left"}`}>
+                            <div
+                                key={index}
+                                className={`${userName !== msg.author ? "text-right bg-blue-500" : "text-left bg-green-500"}`}
+                            >
                                 <p>{msg.message}</p>
                                 <p>{msg.time}</p>
                                 <p>{msg.author}</p>
@@ -62,8 +66,7 @@ const Chat = ({ socket, userName, room }) => {
                 <button
                     type="button"
                     onClick={sendMsg}
-                    className='rounded bg-slate-50 p-1 text-black'
-                >
+                    className='rounded bg-slate-50 p-1 text-black'>
                     Send
                 </button>
             </footer>
