@@ -10,6 +10,10 @@ const Login = () => {
 
         // Your login logic here
 
+        // For simplicity, we'll just display the username in the console for now
+        console.log('Logged in as:', username);
+        console.log('Signed up as:', username);
+
         // Reset form fields after submission
         setUsername('');
         setPassword('');

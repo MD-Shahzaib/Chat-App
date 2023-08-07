@@ -1,23 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
+const socket = io.connect("http://localhost:4000");
 
-const ChatRoom = () => {
-    const [messages, setMessages] = useState([]);
+const ChatRoom = ({ username }) => {
     const navigate = useNavigate();
+    const [currentMsg, setCurrentMsg] = useState('');
+    const [messages, setMessages] = useState([]);
+
+    const sendMsg = async () => {
+        if (!currentMsg) return alert("Write something");
+        const msgDate = new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes();
+        const messageData = {
+            author: username,
+            message: currentMsg,
+            time: msgDate
+        };
+        await socket.emit("send_message", messageData);
+        setMessages((list) => [...list, messageData]);
+        setCurrentMsg('');
+    };
 
     useEffect(() => {
         // Your code to fetch and update messages
-
-        // For the sake of example, we're using a static array of messages
-        setMessages([
-            { id: 1, text: 'Hello' },
-            { id: 2, text: 'How are you?' },
-        ]);
+        socket.on("receive_message", (data) => {
+            setMessages((list) => [...list, data]);
+        });
     }, []);
 
     const handleLogout = () => {
         // Your logout logic here
-
         // After logout, navigate back to the login page
         navigate('/login');
     };

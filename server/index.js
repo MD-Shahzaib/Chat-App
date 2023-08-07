@@ -1,14 +1,22 @@
-const express = require('express');
-const cors = require('cors');
+require('dotenv').config();
+const express = require("express");
 const { Server } = require("socket.io");
 const http = require('http');
+const cors = require('cors');
+const db = require("./config/db");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// Middleware
+app.use(express.json());
 app.use(cors());
 
-const server = http.createServer(app);
+// Connect To MongoDB.
+db.connection.once("open", () => { console.log('✔✔ connect to MongoDB ✔✔') }).on("error", (err) => { console.log('❌❌ Connection error ❌❌==>', err) });
 
+// Socket.io Code.
+const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:3000",
@@ -38,6 +46,10 @@ io.on("connection", (socket) => {
     });
 });
 
-server.listen(PORT, () => {
-    console.log(`Server is Running on Port=${PORT}`);
+// Main Routes.
+app.use('/', require('./routes/index.js'));
+
+// Starting Server.
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
