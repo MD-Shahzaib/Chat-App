@@ -1,94 +1,57 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Register = () => {
-    const [fullName, setFullName] = useState('');
+
+    const navigate = useNavigate();
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [phone, setPhone] = useState('');
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        // Your registration logic here
-
-        // Reset form fields after submission
-        setFullName('');
-        setEmail('');
-        setPassword('');
-        setPhone('');
+    const handleRegister = async (e) => {
+        try {
+            e.preventDefault();
+            const response = await fetch("http://localhost:4000/api/v1/users/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password })
+            });
+            if (response.status === 201) {
+                console.log("Successfully Registerd");
+                navigate('/login')
+            } else {
+                alert("Registration failed, try again Later");
+            }
+            // Reset form fields after submission
+            setName('');
+            setEmail('');
+            setPassword('');
+        } catch (error) {
+            alert("Internal Server Error");
+        }
     };
 
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-900">
+        <div className="flex justify-center py-10 bg-slate-200">
             <form
-                onSubmit={handleSubmit}
-                className="bg-gray-800 shadow-md rounded-lg px-8 py-10 w-1/2"
+                className="w-full max-w-sm p-6 bg-white shadow-md rounded-lg"
+                onSubmit={handleRegister}
             >
-                <h2 className="text-3xl text-white font-bold mb-8">Register</h2>
-                <div className="mb-6">
-                    <label className="block text-white text-sm font-bold mb-2" htmlFor="fullName">
-                        Full Name
-                    </label>
-                    <input
-                        type="text"
-                        id="fullName"
-                        className="bg-gray-700 appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
-                        placeholder="Enter your full name"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                    />
+                <h2 className="text-2xl font-semibold text-center mb-4">Create an account</h2>
+                <div className="mb-4">
+                    <label htmlFor="name" className="block text-sm font-medium">Name:</label>
+                    <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300" required />
                 </div>
-                <div className="mb-6">
-                    <label className="block text-white text-sm font-bold mb-2" htmlFor="email">
-                        Email
-                    </label>
-                    <input
-                        type="email"
-                        id="email"
-                        className="bg-gray-700 appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
+                <div className="mb-4">
+                    <label htmlFor="email" className="block text-sm font-medium">Email:</label>
+                    <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300" required />
                 </div>
-                <div className="mb-6">
-                    <label className="block text-white text-sm font-bold mb-2" htmlFor="password">
-                        Password
-                    </label>
-                    <input
-                        type="password"
-                        id="password"
-                        className="bg-gray-700 appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                <div className="mb-4">
+                    <label htmlFor="password" className="block text-sm font-medium">Password:</label>
+                    <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300" required minLength={6} />
                 </div>
-                <div className="mb-6">
-                    <label className="block text-white text-sm font-bold mb-2" htmlFor="phone">
-                        Phone Number
-                    </label>
-                    <input
-                        type="tel"
-                        id="phone"
-                        className="bg-gray-700 appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
-                        placeholder="Enter your phone number"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                    />
-                </div>
-                <div className="flex items-center justify-between">
-                    <button
-                        type="submit"
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    >
-                        Register
-                    </button>
-                </div>
-                <p className="text-white mt-4">
-                    Already have an account? <Link to="/login" className="text-blue-400">Login</Link>
-                </p>
+                <button type="submit" role="button" className="w-full px-4 py-2 mb-4 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600">Sign Up</button>
+                <p className="text-blue-500 text-center text-sm font-normal hover:text-blue-600">Already have an account? <Link to='/login' className="text-blue-600 font-semibold hover:text-blue-700"> Sign In</Link></p>
             </form>
         </div>
     );

@@ -1,59 +1,109 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import io from 'socket.io-client';
-const socket = io.connect("http://localhost:4000");
+// ChatRoom.js
+import React, { useState, useEffect, useContext } from 'react';
+import ScrollToBottom from 'react-scroll-to-bottom';
+import { UserContext } from '../context/UserContext';
+import Dropdown from './Dropdown';
 
 const ChatRoom = ({ username }) => {
-    const navigate = useNavigate();
-    const [currentMsg, setCurrentMsg] = useState('');
-    const [messages, setMessages] = useState([]);
-
-    const sendMsg = async () => {
-        if (!currentMsg) return alert("Write something");
-        const msgDate = new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes();
-        const messageData = {
-            author: username,
-            message: currentMsg,
-            time: msgDate
-        };
-        await socket.emit("send_message", messageData);
-        setMessages((list) => [...list, messageData]);
-        setCurrentMsg('');
+    const { user, handleLogout } = useContext(UserContext);
+    const [messageList, setMessageList] = useState([]);
+    const handleSendMessage = (message) => {
+        setMessageList((prevMessages) => [
+            ...prevMessages,
+            {
+                message: message,
+                author: username,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            },
+        ]);
     };
 
     useEffect(() => {
-        // Your code to fetch and update messages
-        socket.on("receive_message", (data) => {
-            setMessages((list) => [...list, data]);
-        });
+        // ... (Socket.io connection logic)
+        // For simplicity, we won't implement the Socket.io logic here.
+        // Instead, we'll just add some dummy messages when the component mounts.
+
+        // Dummy data to simulate incoming messages
+        const dummyMessages = [
+            { message: 'Hello!', author: 'John', time: '10:00 AM' },
+            { message: 'Hi there!', author: 'Alice', time: '10:05 AM' },
+            { message: 'How are you?', author: 'John', time: '10:10 AM' },
+            { message: 'I am good!', author: 'Alice', time: '10:15 AM' },
+        ];
+
+        setMessageList(dummyMessages);
     }, []);
 
-    const handleLogout = () => {
-        // Your logout logic here
-        // After logout, navigate back to the login page
-        navigate('/login');
-    };
-
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
-            <h1 className="text-3xl font-bold mb-4">Chat Room</h1>
-            <div className="bg-white rounded-lg shadow-lg w-96 max-w-full p-4">
-                <ul className="overflow-y-auto max-h-64">
-                    {messages.map((message) => (
-                        <li key={message.id} className="text-gray-800 p-2 mb-2 rounded-md bg-gray-200">
-                            {message.text}
-                        </li>
-                    ))}
-                </ul>
-                <button
-                    className="bg-red-500 text-white px-4 py-2 mt-4 rounded-md"
-                    onClick={handleLogout}
-                >
-                    Logout
-                </button>
-            </div>
+        <div className="bg-slate-800">
+            <header className="bg-slate-900 text-white py-4 px-6 flex justify-between items-center">
+                <span className="text-2xl font-bold">MyChat</span>
+                <Dropdown userName={user?.name} userEmail={user?.email} logout={handleLogout} />
+            </header>
+            <ChatMessages messageList={messageList} username={username} />
+            <ChatInput onSendMessage={handleSendMessage} />
         </div>
     );
 };
 
 export default ChatRoom;
+
+// ChatMessage.js
+const ChatMessage = ({ message, isOwnMessage }) => {
+    return (
+        <div className={`${isOwnMessage ? 'text-right' : 'text-left'} mb-2`}>
+            <div
+                className={`inline-block rounded-lg py-2 px-4 max-w-xs text-white ${isOwnMessage ? 'bg-teal-800' : 'bg-slate-700'
+                    }`}
+            >
+                <p className="text-sm">{message.message}</p>
+                <p className="text-xs text-gray-300">{message.time}</p>
+            </div>
+        </div>
+    );
+};
+
+// ChatMessages.js
+const ChatMessages = ({ messageList, username }) => {
+    return (
+        <main className="p-4">
+            <ScrollToBottom className='h-[calc(100vh-10.5rem)]'>
+                {messageList.map((msg, index) => (
+                    <ChatMessage
+                        key={index}
+                        message={msg}
+                        isOwnMessage={msg.author === username}
+                    />
+                ))}
+            </ScrollToBottom>
+        </main>
+    );
+};
+
+// ChatInput.js
+const ChatInput = ({ onSendMessage }) => {
+    const [currentMsg, setCurrentMsg] = useState('');
+    const handleSendMsg = () => {
+        if (currentMsg.trim() !== '') {
+            onSendMessage(currentMsg);
+            setCurrentMsg('');
+        }
+    };
+    return (
+        <footer className="bg-slate-900 p-4 flex justify-between items-center sticky bottom-0">
+            <input
+                type="text"
+                className="w-full py-2 px-4 rounded-lg bg-slate-800 outline-none text-white placeholder:text-white"
+                placeholder="Type a message"
+                value={currentMsg}
+                onChange={(e) => setCurrentMsg(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMsg()}
+            />
+            <button
+                type="button"
+                onClick={handleSendMsg}
+                className="bg-slate-800 hover:bg-slate-700 font-semibold text-white py-2 px-4 rounded-lg ml-4"
+            >Send</button>
+        </footer>
+    );
+};
