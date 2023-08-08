@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const Users = require('../models/ChatUser'); //
+const Users = require('../models/ChatUser');
 const verifyToken = require('../middleware/verifyToken');
 
-// Get-Users (Endpoint: "http://localhost:4000/api/v1/users" using "GET".
+// Get-Users (Endpoint: "http://localhost:4000/api/v1/users" using "GET" (auth) Required).
 router.get('/', verifyToken, async (req, res) => {
     try {
         const users = await Users.find();
@@ -16,8 +16,7 @@ router.get('/', verifyToken, async (req, res) => {
 // Get-User-Profile (Endpoint: "http://localhost:4000/api/v1/users/profile" using "GET" (auth) Required).
 router.get('/profile', verifyToken, async (req, res) => {
     try {
-        const { _id } = req.decoded
-        const userData = await Users.findById(_id).select("-password -tokens");
+        const userData = await Users.findById(req.decoded._id).select("-password -tokens");
         res.status(200).json({ message: "Success", data: userData });
     } catch (error) {
         res.status(500).json({ message: "Error fetching user profile", error });
@@ -27,10 +26,9 @@ router.get('/profile', verifyToken, async (req, res) => {
 // Register-User (Endpoint: "http://localhost:4000/api/v1/users/register" using "POST" (no-auth) Required).
 router.post('/register', async (req, res) => {
     try {
-        const data = req.body;
-        const user = new Users(data);
+        const user = new Users(req.body);
         await user.save();
-        res.status(201).json({ message: 'Success', data });
+        res.status(201).json({ message: 'Success', user });
     } catch (error) {
         res.status(500).json({ message: "Error registering user", error });
     }
@@ -61,10 +59,8 @@ router.post('/login', async (req, res) => {
 // Update-User (Endpoint: "http://localhost:4000/api/v1/users/:id" using "PUT" (auth) Required).
 router.put('/:id', verifyToken, async (req, res) => {
     try {
-        const _id = req.params.id;
-        const data = req.body;
-        await Users.findByIdAndUpdate(_id, data)
-        res.status(200).json({ message: 'Success', id: _id, data });
+        await Users.findByIdAndUpdate(req.params.id, req.body)
+        res.status(200).json({ message: 'Success' });
     } catch (error) {
         res.status(500).json({ message: "Error updating user", error });
     }
@@ -73,9 +69,8 @@ router.put('/:id', verifyToken, async (req, res) => {
 // Delete-User (Endpoint: "http://localhost:4000/api/v1/users/:id" using "DELETE" (auth) Required).
 router.delete('/:id', verifyToken, async (req, res) => {
     try {
-        const _id = req.params.id;
         await Users.findByIdAndDelete(req.params.id)
-        res.status(200).json({ message: 'Success', id: _id });
+        res.status(200).json({ message: 'Success' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting user', error });
     }
