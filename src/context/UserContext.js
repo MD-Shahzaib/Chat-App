@@ -12,7 +12,7 @@ export const UserContextProvider = ({ children }) => {
             try {
                 const token = localStorage.getItem('AuthToken');
                 if (token) {
-                    const response = await fetch("http://localhost:4000/api/v1/users/profile", {
+                    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/v1/users/profile`, {
                         headers: { Authorization: `Bearer ${token}` },
                     });
                     if (!response.ok) {

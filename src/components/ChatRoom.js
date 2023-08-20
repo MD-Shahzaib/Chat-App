@@ -74,7 +74,7 @@ const ChatRoom = () => {
 
     // Comment: Establishes a socket connection when the component mounts.
     useEffect(() => {
-        const newSocket = io.connect("http://localhost:4000");
+        const newSocket = io.connect(`${process.env.REACT_APP_API_BASE_URL}`);
         setSocket(newSocket);
         return () => {
             newSocket.disconnect(); // Clean up socket on component unmount.

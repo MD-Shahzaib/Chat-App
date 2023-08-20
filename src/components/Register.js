@@ -11,7 +11,7 @@ const Register = () => {
     const handleRegister = async (e) => {
         try {
             e.preventDefault();
-            const response = await fetch("http://localhost:4000/api/v1/users/register", {
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/v1/users/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, email, password })
